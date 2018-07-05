@@ -2795,10 +2795,11 @@ namespace SQLite
 				}
 				else if (value is DateTime) {
 					if (storeDateTimeAsTicks) {
-						SQLite3.BindInt64 (stmt, index, ((DateTime)value).Ticks);
+						SQLite3.BindInt64 (stmt, index, ((DateTime)value).ToUniversalTime().Ticks);
 					}
 					else {
-						SQLite3.BindText (stmt, index, ((DateTime)value).ToString (DateTimeExactStoreFormat, System.Globalization.CultureInfo.InvariantCulture), -1, NegativePointer);
+						string val = ((DateTime)value).ToUniversalTime().ToString (DateTimeExactStoreFormat, System.Globalization.CultureInfo.InvariantCulture);
+						SQLite3.BindText (stmt, index, val, -1, NegativePointer);
 					}
 				}
 				else if (value is DateTimeOffset) {
@@ -2873,7 +2874,7 @@ namespace SQLite
 				}
 				else if (clrType == typeof (DateTime)) {
 					if (_conn.StoreDateTimeAsTicks) {
-						return new DateTime (SQLite3.ColumnInt64 (stmt, index));
+						return new DateTime (SQLite3.ColumnInt64 (stmt, index), DateTimeKind.Utc);
 					}
 					else {
 						var text = SQLite3.ColumnString (stmt, index);
